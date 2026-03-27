@@ -3,67 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ViGram Final Fix</title>
+    <title>ViGram OS</title>
     <style>
-        :root { --tg-blue: #248bcf; --tg-bg: #e6eff5; --tg-my-msg: #effdde; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--tg-bg); margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        
-        /* Вход */
-        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; }
-        #login-screen input { padding: 12px; border-radius: 8px; border: none; width: 250px; margin-bottom: 10px; font-size: 16px; outline: none; }
-        #login-screen button { padding: 10px 30px; border-radius: 8px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; }
+        :root {
+            --tg-blue: #248bcf;
+            --tg-bg: #c7d7e2;
+            --tg-my-msg: #effdde;
+            --tg-white: #ffffff;
+            --tg-gray: #8e8e93;
+            --tg-border: #dfe5ec;
+        }
 
-        /* Чат */
-        #app { width: 100%; max-width: 500px; height: 100vh; background: white; display: none; flex-direction: column; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-        
-        header { background: var(--tg-blue); color: white; padding: 15px; font-weight: bold; font-size: 18px; z-index: 10; }
-        
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #7da0ca url("https://www.transparenttextures.com/patterns/cubes.png"); padding-bottom: 80px; }
-        
-        .msg-wrap { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; }
-        .is-me { align-self: flex-end; flex-direction: row-reverse; }
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
 
-        .avatar { width: 35px; height: 35px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; }
+        /* ЭКРАН ВХОДА */
+        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: white; transition: 0.5s; }
+        .login-card { background: rgba(0,0,0,0.1); padding: 40px; border-radius: 20px; text-align: center; backdrop-filter: blur(10px); }
+        #login-screen input { padding: 15px; border-radius: 10px; border: none; width: 300px; font-size: 16px; outline: none; margin-bottom: 20px; }
+        #login-screen button { padding: 12px 60px; border-radius: 10px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        #login-screen button:hover { transform: scale(1.05); }
+
+        /* ГЛАВНЫЙ КОНТЕЙНЕР (ПК ТИП) */
+        #main-app { display: none; width: 100vw; height: 100vh; grid-template-columns: 350px 1fr; background: white; }
+
+        /* БОКОВАЯ ПАНЕЛЬ */
+        .sidebar { border-right: 1px solid var(--tg-border); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; background: var(--tg-blue); color: white; display: flex; align-items: center; gap: 15px; }
+        .search-box { padding: 10px; border-bottom: 1px solid var(--tg-border); }
+        .search-box input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #f4f4f5; outline: none; }
+        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-item { padding: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f9f9f9; }
+        .chat-item:hover { background: #f4f4f5; }
+        .chat-item.active { background: #eff7ff; }
+
+        /* ОКНО ЧАТА */
+        .chat-window { display: flex; flex-direction: column; background: #e7ebf0 url("https://www.transparenttextures.com/patterns/cubes.png"); position: relative; }
         
-        .bubble { background: white; padding: 8px 12px; border-radius: 12px 12px 12px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; min-width: 50px; }
-        .is-me .bubble { background: var(--tg-my-msg); border-radius: 12px 12px 4px 12px; }
+        .chat-header { height: 60px; background: white; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--tg-border); z-index: 100; justify-content: space-between; }
+        .user-info b { display: block; font-size: 15px; }
+        .user-info span { font-size: 12px; color: var(--tg-blue); }
 
-        .u-name { font-size: 11px; font-weight: bold; color: var(--tg-blue); margin-bottom: 2px; display: block; }
-        .msg-img { max-width: 100%; border-radius: 8px; margin-top: 5px; display: block; cursor: pointer; max-height: 300px; object-fit: contain; }
-        .msg-meta { font-size: 10px; color: #8e8e93; text-align: right; margin-top: 4px; display: block; }
+        /* СООБЩЕНИЯ */
+        #messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
+        
+        .msg-row { display: flex; align-items: flex-end; gap: 8px; max-width: 70%; position: relative; }
+        .msg-row.me { align-self: flex-end; flex-direction: row-reverse; }
 
-        /* Плашка ввода (фиксированная снизу) */
-        .input-area { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; background: white; border-top: 1px solid #ddd; display: flex; gap: 10px; align-items: center; z-index: 20; }
-        #message-input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ddd; outline: none; background: #f4f4f5; font-size: 16px; }
-        #send-btn { background: none; border: none; color: var(--tg-blue); font-size: 28px; cursor: pointer; padding: 0; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+        
+        .bubble { background: white; padding: 8px 12px; border-radius: 12px 12px 12px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; min-width: 60px; cursor: pointer; }
+        .me .bubble { background: var(--tg-my-msg); border-radius: 12px 12px 4px 12px; }
 
-        /* Просмотр фото */
-        #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-        #viewer img { max-width: 95%; max-height: 95%; }
+        .bubble:hover { filter: brightness(0.95); }
+        .author { font-size: 12px; font-weight: bold; color: var(--tg-blue); margin-bottom: 3px; display: block; }
+        .media-img { max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: zoom-in; }
+        .msg-time { font-size: 10px; color: var(--tg-gray); float: right; margin: 4px 0 0 10px; }
+
+        /* ПЛАШКА ВВОДА */
+        .input-bar { position: absolute; bottom: 0; left: 0; right: 0; background: white; padding: 15px 25px; display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--tg-border); }
+        #msg-input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #ddd; outline: none; background: #f4f4f5; font-size: 16px; }
+        #send-btn { background: none; border: none; color: var(--tg-blue); font-size: 28px; cursor: pointer; transition: 0.2s; }
+        #send-btn:hover { transform: scale(1.1); }
+
+        /* ПРОСМОТРЩИК */
+        #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
+        #viewer img { max-width: 90%; max-height: 90%; border-radius: 5px; }
+
+        /* YouTube Container */
+        .yt-frame { width: 100%; aspect-ratio: 16/9; border-radius: 8px; margin-top: 5px; border: none; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h2>ViGram</h2>
-        <input type="text" id="username-input" placeholder="Введите имя...">
-        <button id="start-btn">ВОЙТИ</button>
+        <div class="login-card">
+            <h1 style="margin: 0 0 10px 0;">ViGram</h1>
+            <p style="opacity: 0.8; margin-bottom: 20px;">Введите имя для начала сессии</p>
+            <input type="text" id="user-name" placeholder="Ваше имя..." maxlength="20">
+            <br>
+            <button id="login-btn">ПРОДОЛЖИТЬ</button>
+        </div>
     </div>
 
     <div id="viewer" onclick="this.style.display='none'"><img id="full-img"></div>
 
-    <div id="app">
-        <header>Общий чат</header>
-        <div id="messages"></div>
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Сообщение или ссылка на фото..." autocomplete="off">
-            <button id="send-btn">➤</button>
+    <div id="main-app">
+        <div class="sidebar">
+            <div class="sidebar-header"><b>ViGram OS</b></div>
+            <div class="search-box"><input type="text" placeholder="Поиск..."></div>
+            <div class="chat-list">
+                <div class="chat-item active">
+                    <div class="avatar" style="background: #ffa06d;">#</div>
+                    <div class="chat-info">
+                        <b>Общий чат</b>
+                        <div id="typing-sub" style="font-size: 12px; color: var(--tg-blue);">в сети</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-window">
+            <div class="chat-header">
+                <div class="user-info">
+                    <b>Общий чат</b>
+                    <span id="typing-status">в сети</span>
+                </div>
+            </div>
+
+            <div id="messages-container"></div>
+
+            <div class="input-bar">
+                <button style="background:none; border:none; font-size:20px; cursor:pointer;">📎</button>
+                <input type="text" id="msg-input" placeholder="Напишите сообщение..." autocomplete="off">
+                <button id="send-btn">➤</button>
+            </div>
         </div>
     </div>
 
+    <audio id="notif-sound" src="https://www.myinstants.com/media/sounds/telegram_notification.mp3"></audio>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, onChildRemoved, serverTimestamp, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCq2JXG77N9vhOoM3q7bQrAubd-GcHrmPc",
@@ -78,66 +140,113 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const messagesRef = ref(db, 'messages');
+        const colors = ['#e57373', '#81c784', '#64b5f6', '#ffb74d', '#ba68c8', '#4db6ac'];
 
         let myName = "";
-        const colors = ['#e57373', '#81c784', '#64b5f6', '#ffb74d', '#ba68c8'];
 
-        document.getElementById('start-btn').onclick = () => {
-            const val = document.getElementById('username-input').value.trim();
-            if(val) {
-                myName = val;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
+        // ЛОГИН
+        document.getElementById('login-btn').onclick = () => {
+            const name = document.getElementById('user-name').value.trim();
+            if(name) {
+                myName = name;
+                document.getElementById('login-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'grid';
+                }, 500);
             }
         };
 
-        window.view = (url) => {
-            document.getElementById('full-img').src = url;
-            document.getElementById('viewer').style.display = 'flex';
-        };
-
-        function sendMessage() {
-            const input = document.getElementById('message-input');
-            const text = input.value.trim();
-            if(text) {
-                push(messagesRef, { user: myName, text: text, time: serverTimestamp() });
+        // ОТПРАВКА
+        function send() {
+            const input = document.getElementById('msg-input');
+            if(input.value.trim()) {
+                push(messagesRef, {
+                    user: myName,
+                    text: input.value,
+                    time: serverTimestamp()
+                });
                 input.value = "";
+                set(ref(db, 'typing/' + myName), null); // Сброс статуса печати
             }
         }
+        document.getElementById('send-btn').onclick = send;
+        document.getElementById('msg-input').onkeydown = (e) => { if(e.key === 'Enter') send(); };
 
-        document.getElementById('send-btn').onclick = sendMessage;
-        document.getElementById('message-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+        // УДАЛЕНИЕ (При клике на сообщение)
+        window.tryDelete = (id, user) => {
+            if(user !== myName) return;
+            if(confirm("Удалить сообщение у всех?")) {
+                remove(ref(db, 'messages/' + id));
+            }
+        };
 
+        // РЕНДЕР
         onChildAdded(messagesRef, (snap) => {
+            const id = snap.key;
             const m = snap.val();
             const isMe = m.user === myName;
-            const wrap = document.createElement('div');
-            wrap.className = `msg-wrap ${isMe ? 'is-me' : ''}`;
             
-            const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+            const date = m.time ? new Date(m.time) : new Date();
+            const time = date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             const color = colors[Math.abs(m.user.split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % colors.length];
 
-            // Проверка: содержит ли текст ссылку на картинку?
-            const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
-            const match = m.text.match(imgRegex);
-            
-            let contentHtml = `<div>${m.text}</div>`;
-            if (match) {
-                contentHtml += `<img src="${match[0]}" class="msg-img" onclick="view('${match[0]}')">`;
+            const wrap = document.createElement('div');
+            wrap.className = `msg-row ${isMe ? 'me' : ''}`;
+            wrap.id = "msg-" + id;
+
+            // Обработка медиа
+            let mediaHtml = '';
+            const imgMatch = m.text.match(/(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|svg))/i);
+            const ytMatch = m.text.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+
+            if(imgMatch) {
+                mediaHtml = `<img src="${imgMatch[0]}" class="media-img" onclick="viewPhoto('${imgMatch[0]}')">`;
+            } else if(ytMatch) {
+                mediaHtml = `<iframe class="yt-frame" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`;
             }
 
             wrap.innerHTML = `
                 ${!isMe ? `<div class="avatar" style="background:${color}">${m.user[0].toUpperCase()}</div>` : ''}
-                <div class="bubble">
-                    ${!isMe ? `<span class="u-name">${m.user}</span>` : ''}
-                    ${contentHtml}
-                    <span class="msg-meta">${time} ${isMe ? '✔' : ''}</span>
+                <div class="bubble" onclick="tryDelete('${id}', '${m.user}')">
+                    ${!isMe ? `<span class="author">${m.user}</span>` : ''}
+                    <div style="font-size:15px; line-height:1.4;">${m.text}</div>
+                    ${mediaHtml}
+                    <span class="msg-time">${time} ${isMe ? '✔✔' : ''}</span>
                 </div>
             `;
-            const box = document.getElementById('messages');
-            box.appendChild(wrap);
-            box.scrollTop = box.scrollHeight;
+            
+            document.getElementById('messages-container').appendChild(wrap);
+            document.getElementById('messages-container').scrollTop = document.getElementById('messages-container').scrollHeight;
+            
+            if(!isMe) document.getElementById('notif-sound').play().catch(()=>{});
         });
+
+        // СЛУШАТЕЛЬ УДАЛЕНИЯ
+        onChildRemoved(messagesRef, (snap) => {
+            const el = document.getElementById("msg-" + snap.key);
+            if(el) el.remove();
+        });
+
+        // СТАТУС ПЕЧАТИ
+        document.getElementById('msg-input').oninput = () => {
+            set(ref(db, 'typing/' + myName), { active: true });
+            clearTimeout(window.t_timer);
+            window.t_timer = setTimeout(() => set(ref(db, 'typing/' + myName), null), 2000);
+        };
+
+        onValue(ref(db, 'typing'), (s) => {
+            const data = s.val() || {};
+            const typers = Object.keys(data).filter(u => u !== myName);
+            const txt = typers.length ? typers.join(', ') + ' печатает...' : 'в сети';
+            document.getElementById('typing-status').innerText = txt;
+            document.getElementById('typing-sub').innerText = txt;
+        });
+
+        window.viewPhoto = (url) => {
+            document.getElementById('full-img').src = url;
+            document.getElementById('viewer').style.display = 'flex';
+        };
     </script>
 </body>
 </html>
