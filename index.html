@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ViGram PC Edition</title>
+    <title>ViGram PC Fix</title>
     <style>
         :root {
             --tg-blue: #248bcf;
@@ -13,56 +13,57 @@
             --tg-gray: #8e8e93;
         }
 
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--tg-bg); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--tg-bg); overflow: hidden; }
         
         /* Вход */
-        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: white; }
+        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; color: white; }
         #login-screen input { padding: 15px; border-radius: 10px; border: none; width: 280px; margin-bottom: 15px; font-size: 16px; outline: none; color: #333; }
         #login-screen button { padding: 12px 40px; border-radius: 10px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; }
 
-        /* Основной контейнер на весь экран */
+        /* Контейнер на весь экран */
         #main-container { display: none; width: 100vw; height: 100vh; grid-template-columns: 300px 1fr; background: white; }
 
         /* Левая панель */
         .sidebar { border-right: 1px solid #ddd; display: flex; flex-direction: column; background: #fff; }
-        .sidebar-header { padding: 15px; background: var(--tg-blue); color: white; font-weight: bold; }
+        .sidebar-header { padding: 15px; background: var(--tg-blue); color: white; font-weight: bold; font-size: 20px; }
         .contact { padding: 15px; display: flex; align-items: center; gap: 10px; background: #f8f9fa; border-bottom: 1px solid #eee; }
 
         /* Чат */
-        .chat-area { display: flex; flex-direction: column; background: #7da0ca url("https://www.transparenttextures.com/patterns/cubes.png"); flex-grow: 1; position: relative; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .chat-area { display: flex; flex-direction: column; background: #7da0ca url("https://www.transparenttextures.com/patterns/cubes.png"); flex-grow: 1; position: relative; height: 100vh; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth; }
 
         /* Сообщения */
-        .msg-wrap { display: flex; align-items: flex-end; gap: 8px; max-width: 75%; }
+        .msg-wrap { display: flex; align-items: flex-end; gap: 8px; max-width: 75%; margin-bottom: 5px; }
         .is-me { align-self: flex-end; flex-direction: row-reverse; }
         
-        .avatar { width: 38px; height: 38px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
         
-        .bubble { background: white; padding: 8px 12px; border-radius: 12px 12px 12px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; min-width: 50px; }
+        .bubble { background: white; padding: 8px 12px; border-radius: 12px 12px 12px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; min-width: 40px; word-wrap: break-word; }
         .is-me .bubble { background: var(--tg-my-msg); border-radius: 12px 12px 4px 12px; }
 
         .u-name { font-size: 12px; font-weight: bold; color: var(--tg-blue); margin-bottom: 3px; display: block; }
-        .msg-img { max-width: 100%; max-height: 350px; border-radius: 8px; margin-top: 5px; cursor: pointer; display: block; }
-        .msg-meta { font-size: 10px; color: var(--tg-gray); text-align: right; margin-top: 4px; }
+        .msg-img { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 5px; cursor: pointer; display: block; }
+        .msg-meta { font-size: 10px; color: var(--tg-gray); text-align: right; margin-top: 4px; display: block; }
 
         /* Поле ввода */
-        .input-box { background: white; padding: 15px; border-top: 1px solid #ddd; }
-        .emoji-bar { margin-bottom: 10px; font-size: 20px; display: flex; gap: 10px; }
-        .emoji-bar span { cursor: pointer; }
-        .controls { display: flex; gap: 10px; align-items: center; }
-        #message-input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background: #f4f4f5; }
-        #send-btn { background: none; border: none; color: var(--tg-blue); font-size: 28px; cursor: pointer; }
+        .input-box { background: white; padding: 15px 25px; border-top: 1px solid #ddd; z-index: 100; }
+        .emoji-bar { margin-bottom: 8px; font-size: 20px; display: flex; gap: 15px; }
+        .emoji-bar span { cursor: pointer; user-select: none; }
+        .controls { display: flex; gap: 12px; align-items: center; }
+        #message-input { flex: 1; padding: 12px 18px; border-radius: 22px; border: 1px solid #ddd; outline: none; background: #f4f4f5; font-size: 16px; }
+        #send-btn { background: none; border: none; color: var(--tg-blue); font-size: 30px; cursor: pointer; padding: 0; line-height: 1; }
 
         /* Просмотр фото */
-        #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
-        #viewer img { max-width: 95%; max-height: 95%; border-radius: 10px; }
+        #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 20000; justify-content: center; align-items: center; cursor: pointer; }
+        #viewer img { max-width: 90%; max-height: 90%; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h1 style="font-size: 40px;">ViGram</h1>
-        <input type="text" id="username-input" placeholder="Ваше имя...">
+        <h1 style="margin-bottom: 5px;">ViGram</h1>
+        <p style="opacity: 0.8; margin-bottom: 25px;">Desktop Version</p>
+        <input type="text" id="username-input" placeholder="Введите ваш ник...">
         <button id="start-btn">ВОЙТИ</button>
     </div>
 
@@ -70,7 +71,7 @@
 
     <div id="main-container">
         <div class="sidebar">
-            <div class="sidebar-header">Меню</div>
+            <div class="sidebar-header">ViGram</div>
             <div class="contact">
                 <div class="avatar" style="background:#ffa06d">#</div>
                 <div>
@@ -129,18 +130,30 @@
             document.getElementById('viewer').style.display = 'flex';
         };
 
-        function send() {
+        function doSend() {
             const input = document.getElementById('message-input');
-            if(input.value.trim()) {
-                push(messagesRef, { user: myName, text: input.value, time: serverTimestamp() });
-                input.value = "";
+            const val = input.value.trim();
+            if(val) {
+                push(messagesRef, { 
+                    user: myName, 
+                    text: val, 
+                    time: serverTimestamp() 
+                }).then(() => {
+                    input.value = "";
+                });
             }
         }
-        document.getElementById('send-btn').onclick = send;
-        document.getElementById('message-input').onkeypress = (e) => e.key === 'Enter' && send();
+
+        document.getElementById('send-btn').onclick = doSend;
+        document.getElementById('message-input').onkeydown = (e) => { 
+            if(e.key === 'Enter') { e.preventDefault(); doSend(); } 
+        };
 
         document.querySelectorAll('.emoji-bar span').forEach(s => {
-            s.onclick = () => { document.getElementById('message-input').value += s.innerText; document.getElementById('message-input').focus(); };
+            s.onclick = () => { 
+                document.getElementById('message-input').value += s.innerText; 
+                document.getElementById('message-input').focus(); 
+            };
         });
 
         onChildAdded(messagesRef, (snap) => {
@@ -152,31 +165,29 @@
             const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
             const color = colors[Math.abs(m.user.split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % colors.length];
 
-            // Проверка на картинку
-            const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
+            // Регулярка для поиска ссылок на картинки
+            const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|svg))/i;
             const match = m.text.match(imgRegex);
             
-            let content = '';
+            let msgContent = `<div>${m.text}</div>`;
             if(match) {
-                content = `<img src="${match[0]}" class="msg-img" onclick="view('${match[0]}')" onerror="this.style.display='none'; this.nextSibling.style.display='block'">
-                           <div style="display:none; color:blue; text-decoration:underline; cursor:pointer;" onclick="window.open('${m.text}')">${m.text}</div>`;
-            } else {
-                content = `<div>${m.text}</div>`;
+                msgContent += `<img src="${match[0]}" class="msg-img" onclick="view('${match[0]}')">`;
             }
 
             wrap.innerHTML = `
                 ${!isMe ? `<div class="avatar" style="background:${color}">${m.user[0].toUpperCase()}</div>` : ''}
                 <div class="bubble">
                     ${!isMe ? `<span class="u-name">${m.user}</span>` : ''}
-                    ${content}
-                    <div class="msg-meta">${time} ${isMe ? '✔✔' : ''}</div>
+                    ${msgContent}
+                    <span class="msg-meta">${time} ${isMe ? '✔✔' : ''}</span>
                 </div>
             `;
-            document.getElementById('messages').appendChild(wrap);
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            const box = document.getElementById('messages');
+            box.appendChild(wrap);
+            box.scrollTop = box.scrollHeight;
         });
 
-        // "Печатает..."
+        // Статус
         document.getElementById('message-input').oninput = () => {
             set(ref(db, 'typing/' + myName), { t: true });
             clearTimeout(window.ty);
