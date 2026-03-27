@@ -1,142 +1,182 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Telegram Web Ultra</title>
+    <title>ViGram Ultra OS 2026</title>
     <style>
         :root {
-            --tg-blue: #0088cc;
-            --tg-bg: #e7ebf0;
-            --tg-my-msg: #effdde;
-            --tg-white: #ffffff;
-            --tg-gray: #8e8e93;
-            --tg-green: #4dbb5e;
+            --primary: #0088cc;
+            --bg: #e7ebf0;
+            --side-bg: #ffffff;
+            --text: #222222;
+            --msg-in: #ffffff;
+            --msg-out: #effdde;
+            --gray: #8e8e93;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto; background: var(--tg-bg); overflow: hidden; }
+        [data-theme="dark"] {
+            --primary: #248bcf;
+            --bg: #0e1621;
+            --side-bg: #17212b;
+            --text: #f5f5f5;
+            --msg-in: #182533;
+            --msg-out: #2b5278;
+            --gray: #7f91a4;
+        }
 
-        /* ЭКРАН ВХОДА */
-        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: white; transition: 0.4s; }
-        .logo-anim { font-size: 60px; margin-bottom: 20px; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        #login-screen input { padding: 15px; border-radius: 12px; border: none; width: 280px; font-size: 16px; outline: none; margin-bottom: 15px; text-align: center; }
-        #login-screen button { padding: 12px 60px; border-radius: 12px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; font-size: 16px; }
+        * { box-sizing: border-box; transition: background 0.3s, color 0.2s; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; color: var(--text); }
 
-        /* ОСНОВНОЙ ПЛЕЙС */
-        #app-container { display: none; width: 100vw; height: 100vh; background: white; }
+        /* --- LOGIN SYSTEM --- */
+        #auth-layer { position: fixed; inset: 0; background: var(--primary); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: white; padding: 40px; border-radius: 24px; text-align: center; width: 350px; box-shadow: var(--shadow); }
+        .auth-card h2 { color: #333; margin-bottom: 10px; }
+        .auth-card input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; margin: 20px 0; outline: none; font-size: 16px; }
+        .auth-card button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
 
-        /* СЕТКА: ПК (Side+Chat) / МОБИЛКА (Только Chat) */
-        .layout { display: grid; grid-template-columns: 350px 1fr; width: 100%; height: 100%; }
-        @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+        /* --- MAIN LAYOUT --- */
+        .main-wrapper { display: grid; grid-template-columns: 380px 1fr; width: 100vw; height: 100vh; background: var(--side-bg); }
+        @media (max-width: 900px) { .main-wrapper { grid-template-columns: 1fr; } .sidebar { display: none; } }
 
-        /* SIDEBAR */
-        .sidebar { border-right: 1px solid #dfe5ec; display: flex; flex-direction: column; background: white; }
-        .side-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: white; border-bottom: 1px solid #f0f0f0; }
-        .side-chat-item { padding: 12px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
-        .side-chat-item:hover { background: #f4f4f5; }
-        .side-chat-item.active { background: #419fd9; color: white; }
-
-        /* CHAT AREA */
-        .chat-view { display: flex; flex-direction: column; background: #c7d7e2 url("https://www.transparenttextures.com/patterns/cubes.png"); position: relative; height: 100%; }
+        /* --- SIDEBAR --- */
+        .sidebar { display: flex; flex-direction: column; border-right: 1px solid rgba(0,0,0,0.1); }
+        .side-top { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+        .search-bar { background: var(--bg); border-radius: 10px; display: flex; align-items: center; padding: 8px 15px; }
+        .search-bar input { background: none; border: none; outline: none; flex: 1; color: var(--text); }
         
-        .chat-header { height: 60px; background: white; display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid #ddd; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .back-btn { display: none; margin-right: 15px; font-size: 20px; cursor: pointer; }
-        @media (max-width: 768px) { .back-btn { display: block; } }
+        .folder-tabs { display: flex; gap: 20px; padding: 0 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .tab { padding: 10px 5px; color: var(--gray); cursor: pointer; font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-        #messages-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 90px; scroll-behavior: smooth; }
+        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-item { padding: 12px 15px; display: flex; gap: 15px; align-items: center; cursor: pointer; position: relative; }
+        .chat-item:hover { background: rgba(0,0,0,0.03); }
+        .chat-item.active { background: var(--primary); }
+        .chat-item.active * { color: white !important; }
+        .avatar-circle { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px; flex-shrink: 0; }
 
-        /* СООБЩЕНИЯ */
-        .msg-line { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; animation: msgIn 0.2s ease-out; position: relative; }
-        .msg-line.me { align-self: flex-end; flex-direction: row-reverse; }
-        @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .avatar { width: 38px; height: 38px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
+        /* --- CHAT AREA --- */
+        .chat-area { display: flex; flex-direction: column; background: var(--bg); position: relative; }
+        .chat-header { height: 60px; background: var(--side-bg); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 100; }
         
-        .bubble { background: white; padding: 8px 12px; border-radius: 15px 15px 15px 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); position: relative; min-width: 60px; transition: 0.2s; }
-        .me .bubble { background: var(--tg-my-msg); border-radius: 15px 15px 5px 15px; }
+        #pinned-bar { display: none; background: var(--side-bg); padding: 5px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; cursor: pointer; }
 
-        .reply-box-in-msg { background: rgba(0,0,0,0.05); border-left: 3px solid var(--tg-blue); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; }
+        .messages-viewport { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+        
+        /* --- MESSAGE BUBBLES --- */
+        .msg-container { display: flex; flex-direction: column; max-width: 75%; position: relative; margin-bottom: 4px; }
+        .msg-container.out { align-self: flex-end; }
+        .msg-container.in { align-self: flex-start; }
 
-        .bubble b { font-size: 12px; color: var(--tg-blue); display: block; margin-bottom: 3px; }
-        .msg-img { max-width: 100%; border-radius: 10px; margin: 5px 0; cursor: pointer; display: block; max-height: 350px; }
-        .msg-info { font-size: 10px; color: var(--tg-gray); text-align: right; display: block; margin-top: 2px; }
-        .read-icon { color: var(--tg-green); margin-left: 3px; font-weight: bold; }
+        .bubble { padding: 8px 12px; border-radius: 12px; font-size: 15px; line-height: 1.4; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .msg-container.in .bubble { background: var(--msg-in); border-bottom-left-radius: 4px; }
+        .msg-container.out .bubble { background: var(--msg-out); border-bottom-right-radius: 4px; }
 
-        /* ПАНЕЛЬ ОТВЕТА (REPLY BAR) */
-        #reply-preview { display: none; background: #fff; border-left: 4px solid var(--tg-blue); padding: 10px 20px; position: absolute; bottom: 70px; left: 0; right: 0; z-index: 50; align-items: center; justify-content: space-between; }
+        .reply-meta { border-left: 2px solid var(--primary); padding-left: 8px; margin-bottom: 5px; opacity: 0.8; font-size: 13px; }
+        .reactions { display: flex; gap: 4px; margin-top: -8px; margin-left: 10px; z-index: 10; }
+        .reaction-chip { background: var(--side-bg); border: 1px solid rgba(0,0,0,0.1); border-radius: 10px; padding: 2px 6px; font-size: 12px; cursor: pointer; }
 
-        /* ВВОД */
-        .input-wrap { position: absolute; bottom: 0; left: 0; right: 0; background: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #ddd; z-index: 100; }
-        #main-input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #eee; background: #f4f4f5; outline: none; font-size: 16px; }
-        .btn-send { color: var(--tg-blue); font-size: 28px; cursor: pointer; border: none; background: none; transition: 0.2s; }
-        .btn-send:hover { transform: scale(1.1); }
+        /* --- INPUT AREA --- */
+        .input-panel { background: var(--side-bg); padding: 10px 20px; display: flex; align-items: flex-end; gap: 15px; position: relative; }
+        .input-container { flex: 1; background: var(--bg); border-radius: 20px; padding: 10px 15px; max-height: 200px; overflow-y: auto; min-height: 40px; outline: none; color: var(--text); }
+        .action-btn { color: var(--primary); font-size: 24px; cursor: pointer; padding-bottom: 5px; border: none; background: none; }
 
-        /* VIEWER */
-        #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; }
-        #viewer img { max-width: 100%; max-height: 100%; }
+        /* --- CONTEXT MENU --- */
+        #context-menu { position: fixed; background: var(--side-bg); border-radius: 12px; box-shadow: var(--shadow); display: none; flex-direction: column; padding: 8px 0; z-index: 5000; min-width: 180px; }
+        .menu-item { padding: 10px 20px; cursor: pointer; font-size: 14px; }
+        .menu-item:hover { background: rgba(0,0,0,0.05); }
+        .menu-item.danger { color: #ff3b30; }
+
+        /* --- UTILS --- */
+        .time { font-size: 11px; color: var(--gray); float: right; margin: 4px -4px -4px 8px; }
+        .msg-img { width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; max-height: 400px; object-fit: cover; }
+        .youtube-embed { width: 100%; aspect-ratio: 16/9; border-radius: 8px; margin-top: 5px; }
+
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="logo-anim">✈️</div>
-        <h1>ViGram</h1>
-        <input type="text" id="nick-input" placeholder="Введите никнейм..." maxlength="15">
-        <button id="enter-btn">ПРОДОЛЖИТЬ</button>
-    </div>
-
-    <div id="viewer" onclick="this.style.display='none'"><img id="v-img"></div>
-
-    <div id="app-container">
-        <div class="layout">
-            <div class="sidebar">
-                <div class="side-header"><b>Telegram Web</b></div>
-                <div class="side-chat-item active">
-                    <div class="avatar" style="background: #ffa06d;">#</div>
-                    <div>
-                        <div style="font-weight:bold">Общий чат</div>
-                        <div id="side-status" style="font-size:12px; opacity:0.8">в сети</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chat-view">
-                <div class="chat-header">
-                    <div class="back-btn">⬅</div>
-                    <div class="avatar" style="background: #248bcf; width:35px; height:35px; margin-right:10px;">V</div>
-                    <div>
-                        <b style="display:block">Общий чат</b>
-                        <span id="header-status" style="font-size:12px; color:var(--tg-blue)">в сети</span>
-                    </div>
-                </div>
-
-                <div id="messages-list"></div>
-
-                <div id="reply-preview">
-                    <div>
-                        <b id="reply-user" style="color:var(--tg-blue); font-size:13px;"></b>
-                        <div id="reply-text" style="font-size:12px; color:#555;"></div>
-                    </div>
-                    <span onclick="cancelReply()" style="cursor:pointer; font-size:20px;">&times;</span>
-                </div>
-
-                <div class="input-wrap">
-                    <button style="background:none; border:none; font-size:20px; color:var(--tg-gray);">📎</button>
-                    <input type="text" id="main-input" placeholder="Написать сообщение..." autocomplete="off">
-                    <button id="send-btn" class="btn-send">➤</button>
-                </div>
-            </div>
+    <div id="auth-layer">
+        <div class="auth-card">
+            <h2>ViGram Ultra</h2>
+            <p>Версия 2026.1</p>
+            <input type="text" id="join-nick" placeholder="Имя или @username">
+            <button id="join-btn">Начать общение</button>
         </div>
     </div>
 
-    <audio id="snd" src="https://www.myinstants.com/media/sounds/telegram_notification.mp3"></audio>
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <div class="side-top">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <b style="font-size: 20px;">ViGram</b>
+                    <button onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; font-size:20px;">🌓</button>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="global-search" placeholder="Поиск сообщений...">
+                </div>
+            </div>
+            <div class="folder-tabs">
+                <div class="tab active">Все</div>
+                <div class="tab">Личные</div>
+                <div class="tab">Группы</div>
+            </div>
+            <div class="chat-list" id="chat-list-render">
+                <div class="chat-item active">
+                    <div class="avatar-circle" style="background: #ffa06d;">#</div>
+                    <div style="flex:1">
+                        <div style="display:flex; justify-content:space-between">
+                            <b style="font-size:15px">Общий чат</b>
+                            <span style="font-size:12px; color:var(--gray)">21:44</span>
+                        </div>
+                        <div id="typing-monitor" style="font-size:13px; color:var(--primary)">в сети</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="chat-area">
+            <header class="chat-header">
+                <div style="display:flex; align-items:center; gap:12px">
+                    <div class="avatar-circle" style="width:40px; height:40px; background:var(--primary); font-size:14px">V</div>
+                    <div>
+                        <b id="active-chat-name">Общий чат</b>
+                        <div style="font-size:12px; color:var(--gray)" id="online-counter">в сети: 1</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:20px; color:var(--gray); cursor:pointer">
+                    <span>🔍</span><span>📞</span><span>⋮</span>
+                </div>
+            </header>
+
+            <div id="pinned-bar" onclick="scrollToPinned()">
+                📌 <span id="pinned-text">Закрепленное сообщение</span>
+            </div>
+
+            <div class="messages-viewport" id="chat-flow"></div>
+
+            <div class="input-panel">
+                <button class="action-btn">📎</button>
+                <div class="input-container" id="input-msg" contenteditable="true" data-placeholder="Написать сообщение..."></div>
+                <button class="action-btn" id="send-trigger">➤</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="context-menu">
+        <div class="menu-item" onclick="handleMenu('reply')">Ответить</div>
+        <div class="menu-item" onclick="handleMenu('pin')">Закрепить</div>
+        <div class="menu-item" onclick="handleMenu('copy')">Копировать текст</div>
+        <div class="menu-item danger" onclick="handleMenu('delete')">Удалить у всех</div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, onChildRemoved, serverTimestamp, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, serverTimestamp, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIG (Используем твой текущий проект)
         const firebaseConfig = {
             apiKey: "AIzaSyCq2JXG77N9vhOoM3q7bQrAubd-GcHrmPc",
             authDomain: "vigram-8027f.firebaseapp.com",
@@ -149,112 +189,133 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const mRef = ref(db, 'messages');
-        let myNick = "";
-        let currentReply = null;
+        const mRef = ref(db, 'messages_ultra');
+        
+        let user = { nick: '', color: '' };
+        let selectedMsgId = null;
+        let replyData = null;
 
-        const colors = ['#e57373', '#81c784', '#64b5f6', '#ffb74d', '#ba68c8', '#4db6ac'];
-
-        // ВХОД
-        document.getElementById('enter-btn').onclick = () => {
-            const val = document.getElementById('nick-input').value.trim();
-            if(val) {
-                myNick = val;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
+        // --- AUTH ---
+        document.getElementById('join-btn').onclick = () => {
+            const nick = document.getElementById('join-nick').value.trim();
+            if(nick) {
+                user.nick = nick;
+                user.color = ['#e57373', '#81c784', '#64b5f6', '#ffb74d', '#ba68c8'][Math.floor(Math.random()*5)];
+                document.getElementById('auth-layer').style.display = 'none';
             }
         };
 
-        // ОТПРАВКА
-        function sendMessage() {
-            const inp = document.getElementById('main-input');
-            const val = inp.value.trim();
-            if(val) {
-                push(mRef, {
-                    user: myNick,
-                    text: val,
-                    replyTo: currentReply,
-                    time: serverTimestamp()
-                });
-                inp.value = "";
-                cancelReply();
-            }
+        // --- CORE FUNCTIONS ---
+        function send() {
+            const el = document.getElementById('input-msg');
+            const text = el.innerText.trim();
+            if(!text) return;
+
+            push(mRef, {
+                u: user.nick,
+                t: text,
+                c: user.color,
+                reply: replyData,
+                time: serverTimestamp(),
+                v: 2026
+            });
+            el.innerText = '';
+            replyData = null;
         }
-        document.getElementById('send-btn').onclick = sendMessage;
-        document.getElementById('main-input').onkeydown = (e) => { if(e.key === 'Enter') sendMessage(); };
 
-        // ОТВЕТЫ
-        window.setReply = (id, user, text) => {
-            currentReply = { user, text: text.substring(0, 50) };
-            document.getElementById('reply-user').innerText = user;
-            document.getElementById('reply-text').innerText = text.substring(0, 50);
-            document.getElementById('reply-preview').style.display = 'flex';
-            document.getElementById('main-input').focus();
-        };
-        window.cancelReply = () => { currentReply = null; document.getElementById('reply-preview').style.display = 'none'; };
-
-        // УДАЛЕНИЕ
-        window.deleteMsg = (id, user) => {
-            if(user === myNick && confirm("Удалить сообщение?")) remove(ref(db, 'messages/' + id));
+        document.getElementById('send-trigger').onclick = send;
+        document.getElementById('input-msg').onkeydown = (e) => {
+            if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
         };
 
-        // РЕНДЕР
+        // --- RENDERING ---
         onChildAdded(mRef, (snap) => {
-            const id = snap.key;
-            const m = snap.val();
-            const isMe = m.user === myNick;
-            const date = m.time ? new Date(m.time) : new Date();
-            const timeStr = date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            const color = colors[Math.abs(m.user.split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % colors.length];
+            renderMessage(snap.key, snap.val());
+        });
 
-            const line = document.createElement('div');
-            line.className = `msg-line ${isMe ? 'me' : ''}`;
-            line.id = "m-" + id;
-
-            // Обработка медиа
-            const imgMatch = m.text.match(/(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i);
-            const ytMatch = m.text.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        function renderMessage(id, data) {
+            const isMe = data.u === user.nick;
+            const container = document.createElement('div');
+            container.className = `msg-container ${isMe ? 'out' : 'in'}`;
+            container.id = `msg-${id}`;
             
-            let media = "";
-            if(imgMatch) media = `<img src="${imgMatch[0]}" class="msg-img" onclick="openFull('${imgMatch[0]}')">`;
-            if(ytMatch) media = `<iframe style="width:100%; aspect-ratio:16/9; border-radius:8px; border:none; margin-top:5px;" src="https://www.youtube.com/embed/${ytMatch[1]}"></iframe>`;
+            const time = data.time ? new Date(data.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--';
 
-            line.innerHTML = `
-                ${!isMe ? `<div class="avatar" style="background:${color}">${m.user[0].toUpperCase()}</div>` : ''}
-                <div class="bubble" oncontextmenu="event.preventDefault(); deleteMsg('${id}','${m.user}')" onclick="setReply('${id}','${m.user}','${m.text}')">
-                    ${!isMe ? `<b>${m.user}</b>` : ''}
-                    ${m.replyTo ? `<div class="reply-box-in-msg"><b>${m.replyTo.user}</b><br>${m.replyTo.text}</div>` : ''}
-                    <div style="font-size:15px;">${m.text}</div>
+            // Парсинг ссылок и медиа
+            let body = data.t;
+            let media = '';
+            const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
+            const ytRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
+            
+            const imgMatch = body.match(imgRegex);
+            const ytMatch = body.match(ytRegex);
+
+            if(imgMatch) media = `<img src="${imgMatch[0]}" class="msg-img" onclick="window.open('${imgMatch[0]}')">`;
+            if(ytMatch) media = `<iframe class="youtube-embed" src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen></iframe>`;
+
+            container.innerHTML = `
+                <div class="bubble" oncontextmenu="showMenu(event, '${id}', '${data.u}', '${data.t}')">
+                    ${!isMe ? `<b style="color:${data.c}; font-size:13px;">${data.u}</b>` : ''}
+                    ${data.reply ? `<div class="reply-meta"><b>${data.reply.u}</b>: ${data.reply.t}</div>` : ''}
+                    <div>${body}</div>
                     ${media}
-                    <span class="msg-info">${timeStr} ${isMe ? '<span class="read-icon">✓✓</span>' : ''}</span>
+                    <span class="time">${time} ${isMe ? '✓✓' : ''}</span>
                 </div>
             `;
             
-            document.getElementById('messages-list').appendChild(line);
-            document.getElementById('messages-list').scrollTop = document.getElementById('messages-list').scrollHeight;
-            if(!isMe) document.getElementById('snd').play().catch(()=>{});
-        });
+            const flow = document.getElementById('chat-flow');
+            flow.appendChild(container);
+            flow.scrollTop = flow.scrollHeight;
+        }
 
-        onChildRemoved(mRef, (snap) => {
-            const el = document.getElementById("m-" + snap.key);
-            if(el) el.remove();
-        });
-
-        // СТАТУС ПЕЧАТИ
-        document.getElementById('main-input').oninput = () => {
-            set(ref(db, 'typing/' + myNick), { a: true });
-            clearTimeout(window.tyt);
-            window.tyt = setTimeout(() => set(ref(db, 'typing/' + myNick), null), 1500);
+        // --- CONTEXT MENU LOGIC ---
+        window.showMenu = (e, id, author, text) => {
+            e.preventDefault();
+            selectedMsgId = id;
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'flex';
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            
+            window.currentContext = { id, author, text };
         };
-        onValue(ref(db, 'typing'), (s) => {
+
+        window.handleMenu = (action) => {
+            const ctx = window.currentContext;
+            if(action === 'delete') remove(ref(db, `messages_ultra/${ctx.id}`));
+            if(action === 'reply') {
+                replyData = { u: ctx.author, t: ctx.text.substring(0, 50) };
+                document.getElementById('input-msg').focus();
+            }
+            if(action === 'pin') {
+                document.getElementById('pinned-bar').style.display = 'block';
+                document.getElementById('pinned-text').innerText = ctx.text;
+            }
+            document.getElementById('context-menu').style.display = 'none';
+        };
+
+        window.onclick = () => document.getElementById('context-menu').style.display = 'none';
+
+        // --- UI UTILS ---
+        window.toggleTheme = () => {
+            const theme = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+        };
+
+        // ТИПИНГ (КТО ПЕЧАТАЕТ)
+        const inputEl = document.getElementById('input-msg');
+        inputEl.oninput = () => {
+            set(ref(db, 'status/' + user.nick), { t: true });
+            clearTimeout(window.t_timer);
+            window.t_timer = setTimeout(() => set(ref(db, 'status/' + user.nick), null), 2000);
+        };
+
+        onValue(ref(db, 'status'), (s) => {
             const data = s.val() || {};
-            const typers = Object.keys(data).filter(u => u !== myNick);
-            const status = typers.length ? typers.join(', ') + ' печатает...' : 'в сети';
-            document.getElementById('header-status').innerText = status;
-            document.getElementById('side-status').innerText = status;
+            const typers = Object.keys(data).filter(n => n !== user.nick);
+            document.getElementById('typing-monitor').innerText = typers.length ? typers.join(', ') + ' печатает...' : 'в сети';
         });
 
-        window.openFull = (url) => { document.getElementById('v-img').src = url; document.getElementById('viewer').style.display = 'flex'; };
     </script>
 </body>
 </html>
