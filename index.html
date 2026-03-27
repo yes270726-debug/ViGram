@@ -1,29 +1,58 @@
-<!DOCTYPE html>
+[27.03.2026 16:38] 𝓗𝓪𝓵𝓵𝔂𝓣𝓸𝓡: <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ViGram Online</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e6eff5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #app { width: 100%; max-width: 450px; background: white; height: 95vh; display: flex; flex-direction: column; box-shadow: 0 5px 25px rgba(0,0,0,0.2); border-radius: 15px; overflow: hidden; }
-        header { background: #248bcf; color: white; padding: 20px; font-size: 22px; font-weight: bold; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-color: #f7f9fa; }
-        .message { background: white; padding: 10px 15px; border-radius: 18px; align-self: flex-start; max-width: 75%; box-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 16px; line-height: 1.4; color: #333; }
-        .my-message { align-self: flex-end; background: #effdde; color: #000; }
-        .input-area { display: flex; padding: 15px; border-top: 1px solid #eee; background: white; }
-        #message-input { flex: 1; padding: 12px 18px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 16px; }
-        #send-btn { background: #248bcf; color: white; border: none; width: 50px; height: 45px; margin-left: 10px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        #send-btn:hover { background: #1e74ad; transform: scale(1.05); }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #e6eff5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        
+        /* Окно логина */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #248bcf; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; }
+        #login-screen input { padding: 15px; border-radius: 25px; border: none; width: 250px; font-size: 16px; margin-bottom: 15px; outline: none; }
+        #login-screen button { padding: 10px 30px; border-radius: 25px; border: none; background: white; color: #248bcf; font-weight: bold; cursor: pointer; font-size: 16px; }
+
+        #app { width: 100%; max-width: 450px; background: white; height: 95vh; display: none; flex-direction: column; box-shadow: 0 5px 25px rgba(0,0,0,0.2); border-radius: 15px; overflow: hidden; }
+        header { background: #248bcf; color: white; padding: 15px; font-size: 20px; font-weight: bold; text-align: center; }
+        
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-color: #f7f9fa; }
+        
+        /* Стиль сообщения */
+        .message { background: white; padding: 8px 12px; border-radius: 12px; align-self: flex-start; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; }
+        .user-name { font-size: 12px; font-weight: bold; color: #248bcf; display: block; margin-bottom: 3px; }
+        .my-message { align-self: flex-end; background: #effdde; }
+        
+        .input-area { display: flex; flex-direction: column; padding: 10px; border-top: 1px solid #eee; background: white; }
+        .controls { display: flex; align-items: center; }
+        #message-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        
+        /* Смайлики */
+        .emoji-bar { display: flex; gap: 10px; padding: 5px; margin-bottom: 5px; font-size: 20px; }
+        .emoji { cursor: pointer; transition: 0.2s; }
+        .emoji:hover { transform: scale(1.3); }
+        
+        #send-btn { background: #248bcf; color: white; border: none; width: 45px; height: 45px; margin-left: 10px; border-radius: 50%; cursor: pointer; font-size: 20px; }
     </style>
 </head>
 <body>
+
+    <div id="login-screen">
+        <h1>ViGram</h1>
+        <input type="text" id="username-input" placeholder="Введите ваш ник...">
+        <button id="start-btn">Войти в чат</button>
+    </div>
+
     <div id="app">
-        <header>ViGram Chat</header>
+        <header id="chat-header">ViGram</header>
         <div id="messages"></div>
         <div class="input-area">
-            <input type="text" id="message-input" placeholder="Написать сообщение..." autocomplete="off">
-            <button id="send-btn">➤</button>
+            <div class="emoji-bar">
+                <span class="emoji">😊</span><span class="emoji">😂</span><span class="emoji">🔥</span><span class="emoji">👍</span><span class="emoji">❤️</span><span class="emoji">😎</span>
+            </div>
+            <div class="controls">
+                <input type="text" id="message-input" placeholder="Написать..." autocomplete="off">
+                <button id="send-btn">➤</button>
+            </div>
         </div>
     </div>
 
@@ -31,7 +60,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // ТВОИ НАСТРОЙКИ FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCq2JXG77N9vhOoM3q7bQrAubd-GcHrmPc",
             authDomain: "vigram-8027f.firebaseapp.com",
@@ -41,39 +69,55 @@
             messagingSenderId: "901776482936",
             appId: "1:901776482936:web:330cc75882fde42a0e438d"
         };
-
-        const app = initializeApp(firebaseConfig);
+[27.03.2026 16:38] 𝓗𝓪𝓵𝓵𝔂𝓣𝓸𝓡: const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const messagesRef = ref(db, 'messages');
 
-        const sendBtn = document.getElementById('send-btn');
-        const messageInput = document.getElementById('message-input');
-        const messagesDiv = document.getElementById('messages');
+        let myName = "";
 
-        // Отправка сообщения
+        // Логика входа
+        document.getElementById('start-btn').onclick = () => {
+            const input = document.getElementById('username-input').value.trim();
+            if(input) {
+                myName = input;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+            }
+        };
+
+        // Логика смайликов
+        document.querySelectorAll('.emoji').forEach(emoji => {
+            emoji.onclick = () => {
+                document.getElementById('message-input').value += emoji.innerText;
+            };
+        });
+
+        // Отправка
         function sendMessage() {
-            const text = messageInput.value.trim();
+            const text = document.getElementById('message-input').value.trim();
             if (text !== "") {
                 push(messagesRef, {
+                    user: myName,
                     text: text,
                     time: serverTimestamp()
                 });
-                messageInput.value = "";
+                document.getElementById('message-input').value = "";
             }
         }
 
-        sendBtn.onclick = sendMessage;
-        messageInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+        document.getElementById('send-btn').onclick = sendMessage;
+        document.getElementById('message-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
 
-        // Слушаем новые сообщения в реальном времени
+        // Прием сообщений
         onChildAdded(messagesRef, (data) => {
             const msg = data.val();
             const msgElement = document.createElement('div');
-            msgElement.className = 'message';
-            msgElement.textContent = msg.text;
+            msgElement.className = 'message' + (msg.user === myName ? ' my-message' : '');
             
-            messagesDiv.appendChild(msgElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            msgElement.innerHTML = <span class="user-name">${msg.user}</span>${msg.text};
+            
+            document.getElementById('messages').appendChild(msgElement);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
         });
     </script>
 </body>
