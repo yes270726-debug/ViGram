@@ -1,4 +1,4 @@
-[27.03.2026 16:38] 𝓗𝓪𝓵𝓵𝔂𝓣𝓸𝓡: <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -69,7 +69,8 @@
             messagingSenderId: "901776482936",
             appId: "1:901776482936:web:330cc75882fde42a0e438d"
         };
-[27.03.2026 16:38] 𝓗𝓪𝓵𝓵𝔂𝓣𝓸𝓡: const app = initializeApp(firebaseConfig);
+
+        const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const messagesRef = ref(db, 'messages');
 
@@ -114,7 +115,7 @@
             const msgElement = document.createElement('div');
             msgElement.className = 'message' + (msg.user === myName ? ' my-message' : '');
             
-            msgElement.innerHTML = <span class="user-name">${msg.user}</span>${msg.text};
+            msgElement.innerHTML = `<span class="user-name">${msg.user}</span>${msg.text}`;
             
             document.getElementById('messages').appendChild(msgElement);
             document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
