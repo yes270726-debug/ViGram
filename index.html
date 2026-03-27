@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ViGram Pro Fixed</title>
+    <title>ViGram Ultra Fixed</title>
     <style>
         :root {
             --tg-blue: #248bcf;
@@ -22,56 +22,66 @@
             background-image: url("https://www.transparenttextures.com/patterns/cubes.png"); /* Легкий паттерн */
         }
 
-        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; }
-        #login-screen input { padding: 15px; border-radius: 12px; border: none; width: 280px; margin-bottom: 15px; outline: none; }
-        #login-screen button { padding: 12px 40px; border-radius: 12px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; }
+        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; transition: 0.3s; }
+        #login-screen input { padding: 15px; border-radius: 12px; border: none; width: 280px; margin-bottom: 15px; outline: none; color: #333; }
+        #login-screen button { padding: 12px 40px; border-radius: 12px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; font-size: 16px; }
 
-        #app { width: 100%; max-width: 500px; background: white; height: 100vh; display: none; flex-direction: column; position: relative; }
+        #app { width: 100%; max-width: 500px; background: white; height: 100vh; display: none; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         
-        header { background: var(--tg-blue); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; }
+        header { background: var(--tg-blue); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; z-index: 5; }
         .header-info { display: flex; flex-direction: column; }
         .header-info .status { font-size: 12px; opacity: 0.8; }
 
         /* Сообщения */
-        .message-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; margin-bottom: 4px; }
+        .message-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; margin-bottom: 4px; position: relative; }
         .my-wrapper { align-self: flex-end; flex-direction: row-reverse; }
 
         .avatar { width: 35px; height: 35px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; }
 
-        .message { background: white; padding: 8px 12px; border-radius: 15px 15px 15px 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; }
+        .message { background: white; padding: 8px 12px; border-radius: 15px 15px 15px 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; min-width: 60px; }
         .my-message { background: var(--tg-my-msg); border-radius: 15px 15px 5px 15px; }
         
         .user-name { font-size: 12px; font-weight: bold; color: var(--tg-blue); margin-bottom: 2px; }
-        .message-img { max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; display: block; }
+        
+        /* Картинки в сообщениях */
+        .message-img { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; cursor: pointer; display: block; transition: 0.2s; }
+        .message-img:hover { filter: brightness(0.9); }
 
         .msg-meta { font-size: 10px; color: var(--tg-gray); margin-top: 4px; display: flex; justify-content: flex-end; align-items: center; gap: 3px; }
 
-        /* Просмотрщик */
-        #image-viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-        #image-viewer img { max-width: 90%; max-height: 90%; border-radius: 8px; }
+        /* Просмотрщик изображений (НА ВЕСЬ ЭКРАН) */
+        #image-viewer { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; 
+            justify-content: center; align-items: center; cursor: pointer; 
+        }
+        #image-viewer img { max-width: 95vw; max-height: 95vh; border-radius: 5px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        #close-viewer { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; }
 
         /* Ввод */
         .input-area { padding: 10px; background: white; border-top: 1px solid #ddd; }
         .controls { display: flex; align-items: center; gap: 10px; }
-        #message-input { flex: 1; padding: 12px; border: 1px solid #eee; background: #f4f4f5; border-radius: 20px; outline: none; }
-        .btn-icon { background: none; border: none; color: var(--tg-blue); font-size: 22px; cursor: pointer; }
+        #message-input { flex: 1; padding: 12px; border: 1px solid #eee; background: #f4f4f5; border-radius: 20px; outline: none; font-size: 15px; }
+        .btn-icon { background: none; border: none; color: var(--tg-blue); font-size: 24px; cursor: pointer; padding: 0; transition: 0.2s; }
+        .btn-icon:hover { transform: scale(1.1); }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h1>ViGram</h1>
-        <input type="text" id="username-input" placeholder="Введите имя...">
-        <button id="start-btn">ВОЙТИ</button>
+        <h1 style="font-size: 48px; margin-bottom: 10px;">ViGram</h1>
+        <p style="margin-bottom: 30px; opacity: 0.9;">Введите ваше имя для входа</p>
+        <input type="text" id="username-input" placeholder="Ваше имя..." maxlength="15">
+        <button id="start-btn">ПРОДОЛЖИТЬ</button>
     </div>
 
     <div id="image-viewer" onclick="this.style.display='none'">
+        <span id="close-viewer">&times;</span>
         <img id="full-image" src="">
     </div>
 
     <div id="app">
         <header>
-            <div class="avatar" style="background: rgba(255,255,255,0.2)">V</div>
+            <div class="avatar" style="background: white; color: var(--tg-blue);">V</div>
             <div class="header-info">
                 <span>Общий чат</span>
                 <span class="status" id="typing-status">в сети</span>
@@ -82,8 +92,7 @@
 
         <div class="input-area">
             <div class="controls">
-                <button class="btn-icon" id="img-btn">📎</button>
-                <input type="text" id="message-input" placeholder="Сообщение..." autocomplete="off">
+                <input type="text" id="message-input" placeholder="Сообщение или ссылка на фото..." autocomplete="off">
                 <button id="send-btn" class="btn-icon">➤</button>
             </div>
         </div>
@@ -110,14 +119,25 @@
         let myName = "";
         const colors = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#BA68C8', '#4DB6AC'];
 
+        // Вход
         document.getElementById('start-btn').onclick = () => {
             const val = document.getElementById('username-input').value.trim();
-            if(val) { myName = val; document.getElementById('login-screen').style.display='none'; document.getElementById('app').style.display='flex'; }
+            if(val) {
+                myName = val;
+                document.getElementById('login-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-screen').style.display='none';
+                    document.getElementById('app').style.display='flex';
+                }, 300);
+            }
         };
 
+        // Логика просмотра фото (window. чтобы работало в динамическом HTML)
         window.openPhoto = (url) => {
-            document.getElementById('full-image').src = url;
-            document.getElementById('image-viewer').style.display = 'flex';
+            const fullImg = document.getElementById('full-image');
+            const viewer = document.getElementById('image-viewer');
+            fullImg.src = url;
+            viewer.style.display = 'flex';
         };
 
         function getAvatarColor(name) {
@@ -126,35 +146,51 @@
             return colors[Math.abs(hash) % colors.length];
         }
 
-        // Кнопка скрепки
-        document.getElementById('img-btn').onclick = () => {
-            const url = prompt("Вставьте ссылку на картинку (заканчивается на .jpg, .png, .gif):");
-            if(url) push(messagesRef, { user: myName, text: url, type: 'img', time: serverTimestamp() });
-        };
-
+        // Отправка (просто текст)
         function send() {
             const input = document.getElementById('message-input');
             if(input.value.trim()) {
-                push(messagesRef, { user: myName, text: input.value, type: 'text', time: serverTimestamp() });
+                push(messagesRef, {
+                    user: myName,
+                    text: input.value.trim(),
+                    time: serverTimestamp()
+                });
                 input.value = "";
             }
         }
         document.getElementById('send-btn').onclick = send;
         document.getElementById('message-input').onkeypress = (e) => e.key === 'Enter' && send();
 
+        // Рендер
         onChildAdded(messagesRef, (snap) => {
             const m = snap.val();
             const isMe = m.user === myName;
             const wrap = document.createElement('div');
             wrap.className = `message-wrapper ${isMe ? 'my-wrapper' : ''}`;
             
-            const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+            const date = m.time ? new Date(m.time) : new Date();
+            const time = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
-            // Логика отображения: текст или картинка
-            const isImage = m.type === 'img' || (m.text.match(/\.(jpeg|jpg|gif|png)$/) != null);
-            let contentHtml = isImage 
-                ? `<img src="${m.text}" class="message-img" onclick="openPhoto('${m.text}')">` 
-                : `<div>${m.text}</div>`;
+            // ЛОГИКА ОПРЕДЕЛЕНИЯ ИЗОБРАЖЕНИЯ (ПРЯМО В КОДЕ)
+            const textContent = m.text.trim();
+            // Регулярное выражение для поиска ссылки в конце сообщения
+            const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
+            const match = textContent.match(imgRegex);
+
+            let contentHtml = '';
+            if (match) {
+                // Если ссылка найдена, отображаем картинку
+                const imgUrl = match[0];
+                // Убираем ссылку из текста, если она там одна
+                const cleanText = textContent.replace(imgUrl, '').trim();
+                contentHtml = `
+                    ${cleanText ? `<div>${cleanText}</div>` : ''}
+                    <img src="${imgUrl}" class="message-img" onclick="openPhoto('${imgUrl}')" onerror="this.onerror=null; this.src='https://placehold.co/200x150?text=Ошибка+загрузки';">
+                `;
+            } else {
+                // Обычный текст
+                contentHtml = `<div>${textContent}</div>`;
+            }
 
             wrap.innerHTML = `
                 ${!isMe ? `<div class="avatar" style="background:${getAvatarColor(m.user)}">${m.user[0].toUpperCase()}</div>` : ''}
@@ -164,8 +200,9 @@
                     <div class="msg-meta">${time} ${isMe ? '<span style="color:#4fc3f7; margin-left:4px">✔✔</span>' : ''}</div>
                 </div>
             `;
-            document.getElementById('messages').appendChild(wrap);
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            const container = document.getElementById('messages');
+            container.appendChild(wrap);
+            container.scrollTop = container.scrollHeight;
         });
 
         // Статус печати
