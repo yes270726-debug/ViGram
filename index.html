@@ -3,58 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ViGram Stable</title>
+    <title>ViGram Final Fix</title>
     <style>
-        :root {
-            --tg-blue: #248bcf;
-            --tg-bg: #e6eff5;
-            --tg-my-msg: #effdde;
-        }
-
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--tg-bg); margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        :root { --tg-blue: #248bcf; --tg-bg: #e6eff5; --tg-my-msg: #effdde; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--tg-bg); margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
         
-        /* Логин */
+        /* Вход */
         #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; }
-        #login-screen input { padding: 12px; border-radius: 8px; border: none; width: 250px; margin-bottom: 10px; font-size: 16px; }
+        #login-screen input { padding: 12px; border-radius: 8px; border: none; width: 250px; margin-bottom: 10px; font-size: 16px; outline: none; }
         #login-screen button { padding: 10px 30px; border-radius: 8px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; }
 
         /* Чат */
-        #app { width: 100%; max-width: 450px; height: 95vh; background: white; display: none; flex-direction: column; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; }
+        #app { width: 100%; max-width: 500px; height: 100vh; background: white; display: none; flex-direction: column; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
         
-        header { background: var(--tg-blue); color: white; padding: 15px; display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        header { background: var(--tg-blue); color: white; padding: 15px; font-weight: bold; font-size: 18px; z-index: 10; }
         
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background: #7da0ca url("https://www.transparenttextures.com/patterns/cubes.png"); }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #7da0ca url("https://www.transparenttextures.com/patterns/cubes.png"); padding-bottom: 80px; }
         
         .msg-wrap { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; }
         .is-me { align-self: flex-end; flex-direction: row-reverse; }
 
         .avatar { width: 35px; height: 35px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; }
         
-        .bubble { background: white; padding: 8px 12px; border-radius: 12px 12px 12px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-break: break-word; }
+        .bubble { background: white; padding: 8px 12px; border-radius: 12px 12px 12px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; min-width: 50px; }
         .is-me .bubble { background: var(--tg-my-msg); border-radius: 12px 12px 4px 12px; }
 
         .u-name { font-size: 11px; font-weight: bold; color: var(--tg-blue); margin-bottom: 2px; display: block; }
+        .msg-img { max-width: 100%; border-radius: 8px; margin-top: 5px; display: block; cursor: pointer; max-height: 300px; object-fit: contain; }
         .msg-meta { font-size: 10px; color: #8e8e93; text-align: right; margin-top: 4px; display: block; }
 
-        /* Ввод */
-        .input-area { padding: 15px; background: white; border-top: 1px solid #ddd; display: flex; gap: 10px; align-items: center; }
-        #message-input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ddd; outline: none; background: #f4f4f5; }
-        #send-btn { background: none; border: none; color: var(--tg-blue); font-size: 24px; cursor: pointer; }
+        /* Плашка ввода (фиксированная снизу) */
+        .input-area { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; background: white; border-top: 1px solid #ddd; display: flex; gap: 10px; align-items: center; z-index: 20; }
+        #message-input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ddd; outline: none; background: #f4f4f5; font-size: 16px; }
+        #send-btn { background: none; border: none; color: var(--tg-blue); font-size: 28px; cursor: pointer; padding: 0; }
+
+        /* Просмотр фото */
+        #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
+        #viewer img { max-width: 95%; max-height: 95%; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <h2>ViGram</h2>
-        <input type="text" id="username-input" placeholder="Ваше имя...">
+        <input type="text" id="username-input" placeholder="Введите имя...">
         <button id="start-btn">ВОЙТИ</button>
     </div>
+
+    <div id="viewer" onclick="this.style.display='none'"><img id="full-img"></div>
 
     <div id="app">
         <header>Общий чат</header>
         <div id="messages"></div>
         <div class="input-area">
-            <input type="text" id="message-input" placeholder="Сообщение..." autocomplete="off">
+            <input type="text" id="message-input" placeholder="Сообщение или ссылка на фото..." autocomplete="off">
             <button id="send-btn">➤</button>
         </div>
     </div>
@@ -89,10 +91,16 @@
             }
         };
 
+        window.view = (url) => {
+            document.getElementById('full-img').src = url;
+            document.getElementById('viewer').style.display = 'flex';
+        };
+
         function sendMessage() {
             const input = document.getElementById('message-input');
-            if(input.value.trim()) {
-                push(messagesRef, { user: myName, text: input.value, time: serverTimestamp() });
+            const text = input.value.trim();
+            if(text) {
+                push(messagesRef, { user: myName, text: text, time: serverTimestamp() });
                 input.value = "";
             }
         }
@@ -109,16 +117,26 @@
             const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
             const color = colors[Math.abs(m.user.split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % colors.length];
 
+            // Проверка: содержит ли текст ссылку на картинку?
+            const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
+            const match = m.text.match(imgRegex);
+            
+            let contentHtml = `<div>${m.text}</div>`;
+            if (match) {
+                contentHtml += `<img src="${match[0]}" class="msg-img" onclick="view('${match[0]}')">`;
+            }
+
             wrap.innerHTML = `
                 ${!isMe ? `<div class="avatar" style="background:${color}">${m.user[0].toUpperCase()}</div>` : ''}
                 <div class="bubble">
                     ${!isMe ? `<span class="u-name">${m.user}</span>` : ''}
-                    <div>${m.text}</div>
-                    <span class="msg-meta">${time}</span>
+                    ${contentHtml}
+                    <span class="msg-meta">${time} ${isMe ? '✔' : ''}</span>
                 </div>
             `;
-            document.getElementById('messages').appendChild(wrap);
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            const box = document.getElementById('messages');
+            box.appendChild(wrap);
+            box.scrollTop = box.scrollHeight;
         });
     </script>
 </body>
