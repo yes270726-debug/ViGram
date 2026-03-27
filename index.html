@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ViGram Desktop</title>
+    <title>ViGram PC Edition</title>
     <style>
         :root {
             --tg-blue: #248bcf;
@@ -11,98 +11,83 @@
             --tg-my-msg: #effdde;
             --tg-white: #ffffff;
             --tg-gray: #8e8e93;
-            --tg-border: #dfe5ec;
         }
 
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--tg-bg); overflow: hidden; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--tg-bg); }
         
-        /* Экран входа */
-        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; color: white; }
-        #login-screen input { padding: 15px; border-radius: 10px; border: none; width: 300px; margin-bottom: 15px; font-size: 16px; outline: none; }
-        #login-screen button { padding: 12px 50px; border-radius: 10px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; font-size: 16px; }
+        /* Вход */
+        #login-screen { position: fixed; inset: 0; background: var(--tg-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: white; }
+        #login-screen input { padding: 15px; border-radius: 10px; border: none; width: 280px; margin-bottom: 15px; font-size: 16px; outline: none; color: #333; }
+        #login-screen button { padding: 12px 40px; border-radius: 10px; border: none; background: white; color: var(--tg-blue); font-weight: bold; cursor: pointer; }
 
-        /* Макет для ПК */
-        #main-container { display: none; width: 100vw; height: 100vh; grid-template-columns: 350px 1fr; background: var(--tg-white); }
+        /* Основной контейнер на весь экран */
+        #main-container { display: none; width: 100vw; height: 100vh; grid-template-columns: 300px 1fr; background: white; }
 
-        /* Левая панель (Контакты) */
-        .sidebar { border-right: 1px solid var(--tg-border); display: flex; flex-direction: column; background: var(--tg-white); }
-        .sidebar-header { padding: 20px; background: var(--tg-blue); color: white; font-weight: bold; font-size: 18px; }
-        .contact-item { padding: 15px 20px; display: flex; align-items: center; gap: 15px; background: #f1f9ff; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        .contact-info b { display: block; color: #222; }
-        .contact-info span { font-size: 13px; color: var(--tg-blue); }
+        /* Левая панель */
+        .sidebar { border-right: 1px solid #ddd; display: flex; flex-direction: column; background: #fff; }
+        .sidebar-header { padding: 15px; background: var(--tg-blue); color: white; font-weight: bold; }
+        .contact { padding: 15px; display: flex; align-items: center; gap: 10px; background: #f8f9fa; border-bottom: 1px solid #eee; }
 
-        /* Окно чата */
-        .chat-area { display: flex; flex-direction: column; background-color: #7da0ca; background-image: url("https://www.transparenttextures.com/patterns/cubes.png"); position: relative; }
-        
-        .chat-header { height: 60px; background: var(--tg-white); display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--tg-border); z-index: 10; }
-        
+        /* Чат */
+        .chat-area { display: flex; flex-direction: column; background: #7da0ca url("https://www.transparenttextures.com/patterns/cubes.png"); flex-grow: 1; position: relative; }
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
 
         /* Сообщения */
-        .message-wrapper { display: flex; align-items: flex-end; gap: 10px; max-width: 70%; margin-bottom: 5px; }
-        .my-wrapper { align-self: flex-end; flex-direction: row-reverse; }
-
-        .avatar { width: 40px; height: 40px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
-
-        .message { background: var(--tg-white); padding: 10px 15px; border-radius: 12px 12px 12px 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; }
-        .my-message { background: var(--tg-my-msg); border-radius: 12px 12px 3px 12px; }
+        .msg-wrap { display: flex; align-items: flex-end; gap: 8px; max-width: 75%; }
+        .is-me { align-self: flex-end; flex-direction: row-reverse; }
         
-        .user-name { font-size: 13px; font-weight: bold; color: var(--tg-blue); margin-bottom: 4px; }
-        .message-img { max-width: 100%; max-height: 400px; border-radius: 8px; margin-top: 8px; cursor: zoom-in; display: block; }
+        .avatar { width: 38px; height: 38px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+        
+        .bubble { background: white; padding: 8px 12px; border-radius: 12px 12px 12px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; min-width: 50px; }
+        .is-me .bubble { background: var(--tg-my-msg); border-radius: 12px 12px 4px 12px; }
 
-        .msg-meta { font-size: 11px; color: var(--tg-gray); margin-top: 5px; display: flex; justify-content: flex-end; align-items: center; gap: 5px; }
+        .u-name { font-size: 12px; font-weight: bold; color: var(--tg-blue); margin-bottom: 3px; display: block; }
+        .msg-img { max-width: 100%; max-height: 350px; border-radius: 8px; margin-top: 5px; cursor: pointer; display: block; }
+        .msg-meta { font-size: 10px; color: var(--tg-gray); text-align: right; margin-top: 4px; }
 
         /* Поле ввода */
-        .input-container { background: var(--tg-white); padding: 15px 30px; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--tg-border); }
-        .emoji-row { display: flex; gap: 15px; font-size: 22px; }
-        .emoji-row span { cursor: pointer; transition: 0.2s; }
-        .emoji-row span:hover { transform: scale(1.3); }
-
-        .input-row { display: flex; align-items: center; gap: 15px; }
-        #message-input { flex: 1; padding: 12px 20px; border: 1px solid #eee; background: #f4f4f5; border-radius: 25px; outline: none; font-size: 16px; }
-        
-        #send-btn { background: none; border: none; color: var(--tg-blue); font-size: 30px; cursor: pointer; }
+        .input-box { background: white; padding: 15px; border-top: 1px solid #ddd; }
+        .emoji-bar { margin-bottom: 10px; font-size: 20px; display: flex; gap: 10px; }
+        .emoji-bar span { cursor: pointer; }
+        .controls { display: flex; gap: 10px; align-items: center; }
+        #message-input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background: #f4f4f5; }
+        #send-btn { background: none; border: none; color: var(--tg-blue); font-size: 28px; cursor: pointer; }
 
         /* Просмотр фото */
-        #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 20000; justify-content: center; align-items: center; cursor: pointer; }
-        #viewer img { max-width: 90%; max-height: 90%; border-radius: 5px; }
+        #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
+        #viewer img { max-width: 95%; max-height: 95%; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h1>ViGram Desktop</h1>
-        <input type="text" id="username-input" placeholder="Введите ваш ник...">
-        <button id="start-btn">Начать общение</button>
+        <h1 style="font-size: 40px;">ViGram</h1>
+        <input type="text" id="username-input" placeholder="Ваше имя...">
+        <button id="start-btn">ВОЙТИ</button>
     </div>
 
-    <div id="viewer" onclick="this.style.display='none'"><img id="full-img"></div>
+    <div id="viewer" onclick="this.style.display='none'"><img id="full-img" src=""></div>
 
     <div id="main-container">
         <div class="sidebar">
-            <div class="sidebar-header">ViGram</div>
-            <div class="contact-item">
-                <div class="avatar" style="background: #ffa06d;">#</div>
-                <div class="contact-info">
-                    <b>Общий чат</b>
-                    <span id="typing-status">в сети</span>
+            <div class="sidebar-header">Меню</div>
+            <div class="contact">
+                <div class="avatar" style="background:#ffa06d">#</div>
+                <div>
+                    <div style="font-weight:bold">Общий чат</div>
+                    <div id="status" style="font-size:12px; color:var(--tg-blue)">в сети</div>
                 </div>
             </div>
         </div>
 
         <div class="chat-area">
-            <div class="chat-header">
-                <b id="chat-title">Общий чат</b>
-            </div>
-            
             <div id="messages"></div>
-
-            <div class="input-container">
-                <div class="emoji-row">
-                    <span>😊</span><span>😂</span><span>🔥</span><span>👍</span><span>❤️</span><span>😎</span><span>😡</span><span>🖼️</span>
+            <div class="input-box">
+                <div class="emoji-bar">
+                    <span>😊</span><span>😂</span><span>👍</span><span>❤️</span><span>🔥</span><span>🖼️</span>
                 </div>
-                <div class="input-row">
-                    <input type="text" id="message-input" placeholder="Напишите сообщение или вставьте ссылку на фото..." autocomplete="off">
+                <div class="controls">
+                    <input type="text" id="message-input" placeholder="Напишите сообщение..." autocomplete="off">
                     <button id="send-btn">➤</button>
                 </div>
             </div>
@@ -130,7 +115,6 @@
         let myName = "";
         const colors = ['#e57373', '#81c784', '#64b5f6', '#ffb74d', '#ba68c8', '#4db6ac'];
 
-        // Вход
         document.getElementById('start-btn').onclick = () => {
             const val = document.getElementById('username-input').value.trim();
             if(val) {
@@ -140,76 +124,68 @@
             }
         };
 
-        // Смайлики
-        document.querySelectorAll('.emoji-row span').forEach(el => {
-            el.onclick = () => {
-                if(el.innerText === '🖼️') {
-                    const url = prompt("Вставьте прямую ссылку на фото (должна заканчиваться на .jpg, .png, .gif):");
-                    if(url) document.getElementById('message-input').value = url;
-                } else {
-                    document.getElementById('message-input').value += el.innerText;
-                }
-                document.getElementById('message-input').focus();
-            };
-        });
+        window.view = (url) => {
+            document.getElementById('full-img').src = url;
+            document.getElementById('viewer').style.display = 'flex';
+        };
 
-        // Отправка
-        function sendMessage() {
+        function send() {
             const input = document.getElementById('message-input');
-            const text = input.value.trim();
-            if(text) {
-                push(messagesRef, { user: myName, text: text, time: serverTimestamp() });
+            if(input.value.trim()) {
+                push(messagesRef, { user: myName, text: input.value, time: serverTimestamp() });
                 input.value = "";
             }
         }
-        document.getElementById('send-btn').onclick = sendMessage;
-        document.getElementById('message-input').onkeypress = (e) => e.key === 'Enter' && sendMessage();
+        document.getElementById('send-btn').onclick = send;
+        document.getElementById('message-input').onkeypress = (e) => e.key === 'Enter' && send();
 
-        // Рендер сообщений
+        document.querySelectorAll('.emoji-bar span').forEach(s => {
+            s.onclick = () => { document.getElementById('message-input').value += s.innerText; document.getElementById('message-input').focus(); };
+        });
+
         onChildAdded(messagesRef, (snap) => {
             const m = snap.val();
             const isMe = m.user === myName;
             const wrap = document.createElement('div');
-            wrap.className = `message-wrapper ${isMe ? 'my-wrapper' : ''}`;
+            wrap.className = `msg-wrap ${isMe ? 'is-me' : ''}`;
             
-            const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--';
+            const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
             const color = colors[Math.abs(m.user.split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % colors.length];
 
             // Проверка на картинку
             const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
             const match = m.text.match(imgRegex);
             
-            let content = match 
-                ? `<img src="${match[0]}" class="message-img" onclick="viewImg('${match[0]}')" onerror="this.src='https://placehold.co/300x200?text=Ошибка:+непрямая+ссылка'">`
-                : `<div>${m.text}</div>`;
+            let content = '';
+            if(match) {
+                content = `<img src="${match[0]}" class="msg-img" onclick="view('${match[0]}')" onerror="this.style.display='none'; this.nextSibling.style.display='block'">
+                           <div style="display:none; color:blue; text-decoration:underline; cursor:pointer;" onclick="window.open('${m.text}')">${m.text}</div>`;
+            } else {
+                content = `<div>${m.text}</div>`;
+            }
 
             wrap.innerHTML = `
                 ${!isMe ? `<div class="avatar" style="background:${color}">${m.user[0].toUpperCase()}</div>` : ''}
-                <div class="message ${isMe ? 'my-message' : ''}">
-                    ${!isMe ? `<div class="user-name">${m.user}</div>` : ''}
+                <div class="bubble">
+                    ${!isMe ? `<span class="u-name">${m.user}</span>` : ''}
                     ${content}
-                    <div class="msg-meta">${time} ${isMe ? '<span>✔✔</span>' : ''}</div>
+                    <div class="msg-meta">${time} ${isMe ? '✔✔' : ''}</div>
                 </div>
             `;
             document.getElementById('messages').appendChild(wrap);
             document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
         });
 
-        window.viewImg = (url) => {
-            document.getElementById('full-img').src = url;
-            document.getElementById('viewer').style.display = 'flex';
-        };
-
-        // Статус печати
+        // "Печатает..."
         document.getElementById('message-input').oninput = () => {
-            set(ref(db, 'typing/' + myName), { typing: true });
-            clearTimeout(window.t);
-            window.t = setTimeout(() => set(ref(db, 'typing/' + myName), { typing: false }), 2000);
+            set(ref(db, 'typing/' + myName), { t: true });
+            clearTimeout(window.ty);
+            window.ty = setTimeout(() => set(ref(db, 'typing/' + myName), { t: false }), 2000);
         };
         onValue(ref(db, 'typing'), (s) => {
             const data = s.val() || {};
-            const names = Object.keys(data).filter(n => data[n].typing && n !== myName);
-            document.getElementById('typing-status').innerText = names.length ? names.join(', ') + ' печатает...' : 'в сети';
+            const names = Object.keys(data).filter(n => data[n].t && n !== myName);
+            document.getElementById('status').innerText = names.length ? names.join(', ') + ' печатает...' : 'в сети';
         });
     </script>
 </body>
